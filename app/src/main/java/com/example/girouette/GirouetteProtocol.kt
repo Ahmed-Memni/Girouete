@@ -1,8 +1,16 @@
 /**
  * FILE: GirouetteProtocol.kt
- * PURPOSE: Defines the byte sequence (Protocol) for each display mode using custom charset.
+ * PURPOSE: Defines the byte sequence (Protocol) for each display mode.
+ * 
+ * WHAT YOU CAN CHANGE HERE:
+ * 1. Mode Logic: Inside the 'when(state.mode)' block, you can define exactly which bytes are sent.
+ * 2. Hex Values: Use 'byteArrayOf(0x05, 0x05...)' to set your unique Headers, Commands, and Footers.
+ * 3. Sequence Order: Change the 'val finalSequence' line to reorder how parts are joined (e.g., header + cmd + text).
+ * 4. Text Formatting: The 'formatLine' function at the bottom handles the 17-char padding (0x20).
  */
 package com.example.girouette
+
+import java.nio.charset.Charset
 
 object GirouetteProtocol {
 
@@ -17,9 +25,11 @@ object GirouetteProtocol {
                 val text = formatLine(state.text1)
                 val mid = byteArrayOf(0x0A) // LF
                 val emptyLine = formatLine("")
-                val footer = byteArrayOf(0x04) + GirouetteCustomCharset.encode("01580A4")
+                val footer = byteArrayOf(0x04) + "01580A4".toByteArray(Charset.forName("US-ASCII"))
 
-                header + cmd + text + mid + emptyLine + footer
+                // --- CONSTRUCT THE SEQUENCE HERE ---
+                val finalSequence = header + cmd + text + mid + emptyLine + footer
+                finalSequence
             }
 
             GirouetteMode.ONE_SCREEN_2_LINES -> {
@@ -28,9 +38,11 @@ object GirouetteProtocol {
                 val t1 = formatLine(state.text1)
                 val mid = byteArrayOf(0x0A)
                 val t2 = formatLine(state.line2)
-                val footer = byteArrayOf(0x04) + GirouetteCustomCharset.encode("01580A4")
+                val footer = byteArrayOf(0x04) + "01580A4".toByteArray(Charset.forName("US-ASCII"))
 
-                header + cmd + t1 + mid + t2 + footer
+                // --- CONSTRUCT THE SEQUENCE HERE ---
+                val finalSequence = header + cmd + t1 + mid + t2 + footer
+                finalSequence
             }
 
             GirouetteMode.CLEAR -> {
@@ -38,7 +50,9 @@ object GirouetteProtocol {
                 val cmd = byteArrayOf(0x43) // 'C'
                 val footer = byteArrayOf(0x04)
 
-                header + cmd + footer
+                // --- CONSTRUCT THE SEQUENCE HERE ---
+                val finalSequence = header + cmd + footer
+                finalSequence
             }
 
             GirouetteMode.ONE_SCREEN_ROUTE_TEXT -> {
@@ -47,9 +61,11 @@ object GirouetteProtocol {
                 val route = formatLine(state.route1)
                 val mid = byteArrayOf(0x0A)
                 val dest = formatLine(state.text1)
-                val footer = byteArrayOf(0x04) + GirouetteCustomCharset.encode("01580A4")
+                val footer = byteArrayOf(0x04) + "01580A4".toByteArray(Charset.forName("US-ASCII"))
 
-                header + cmd + route + mid + dest + footer
+                // --- CONSTRUCT THE SEQUENCE HERE ---
+                val finalSequence = header + cmd + route + mid + dest + footer
+                finalSequence
             }
 
             GirouetteMode.TWO_SCREEN_ROUTE_TEXT -> {
@@ -60,9 +76,11 @@ object GirouetteProtocol {
                 val r2 = formatLine(state.route2)
                 val t2 = formatLine(state.text2)
                 val mid = byteArrayOf(0x0A)
-                val footer = byteArrayOf(0x04) + GirouetteCustomCharset.encode("01580A4")
+                val footer = byteArrayOf(0x04) + "01580A4".toByteArray(Charset.forName("US-ASCII"))
 
-                header + cmd + r1 + mid + t1 + mid + r2 + mid + t2 + footer
+                // --- CONSTRUCT THE SEQUENCE HERE ---
+                val finalSequence = header + cmd + r1 + mid + t1 + mid + r2 + mid + t2 + footer
+                finalSequence
             }
 
             GirouetteMode.SCROLLING_ONE_SCREEN -> {
@@ -71,7 +89,9 @@ object GirouetteProtocol {
                 val text = formatLine(state.text1)
                 val footer = byteArrayOf(0x04)
 
-                header + cmd + text + footer
+                // --- CONSTRUCT THE SEQUENCE HERE ---
+                val finalSequence = header + cmd + text + footer
+                finalSequence
             }
 
             GirouetteMode.SCROLLING_TWO_SCREEN -> {
@@ -84,7 +104,9 @@ object GirouetteProtocol {
                 val mid = byteArrayOf(0x0A)
                 val footer = byteArrayOf(0x04)
 
-                header + cmd + r1 + mid + t1 + mid + r2 + mid + t2 + footer
+                // --- CONSTRUCT THE SEQUENCE HERE ---
+                val finalSequence = header + cmd + r1 + mid + t1 + mid + r2 + mid + t2 + footer
+                finalSequence
             }
 
             GirouetteMode.BLINK -> {
@@ -93,16 +115,19 @@ object GirouetteProtocol {
                 val text = formatLine(state.text1)
                 val footer = byteArrayOf(0x04)
 
-                header + cmd + text + footer
+                // --- CONSTRUCT THE SEQUENCE HERE ---
+                val finalSequence = header + cmd + text + footer
+                finalSequence
             }
         }
     }
 
     /**
-     * Helper: Pads text and converts to bytes using custom charset.
+     * Helper: Converts text to ASCII bytes and pads with spaces (0x20) to exactly 17 chars.
      */
     private fun formatLine(text: String): ByteArray {
-        val paddedText = text.take(17).padEnd(17, ' ')
-        return GirouetteCustomCharset.encode(paddedText)
+        return text.take(17)
+            .padEnd(17, ' ')
+            .toByteArray(Charset.forName("US-ASCII"))
     }
 }

@@ -12,7 +12,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GirouetteTheme {
-                GirouetteScreen()
+                // Now calling the new Preset-based UI instead of GirouetteScreen
+                DisplayPresetScreen()
             }
         }
     }
